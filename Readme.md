@@ -59,12 +59,13 @@
 
       * [UseState](#usestate)
       * useEffect
-      * [useMemo](#usememo)
       * useRef
+      * React.memo()
+      * [useMemo](#usememo)
+      * UseCallback
       * [useReducer](#usereducer)
-      * UseCallback""
-      * useContext
       * useParams hook
+      * How to make Custom Hooks
 
 11. [Routing](#routing)
 
@@ -80,14 +81,13 @@
 12. [Props drilling](#props-drilling)
 13. State uplifting
 14. [Context API](#context-api)
+    
 15. [Axio Vs Fetch](#axio-vs-fetch)
       * Get, post, put,delete
       * Fetch json file and show it in the screen
       * Create own API and Fetch it and show on the screen
       * Difference between axio and fetch
-16. [Lazy Loading](#lazy-loading)
-17. Memory leak
-18. State management
+16. State management
       * [REDUX Toolkit](#redux-toolkit)
       * perform CURD operation in redux
       * Redux thunk 
@@ -861,6 +861,72 @@ export default ChildComponent;
 Output:
 ![parent to child](./p-to-c.png)
 In this example, the ParentComponent passes the data object to the ChildComponent as a prop. The ChildComponent then receives the data object as a prop, and can access its properties using dot notation (data.name, data.age, data.city) within the function body.
+
+
+### >How to pass data from child to parent? 
+In React, you can pass data from a child component to a parent component by using callback functions. 
+
+
+1. **Define a Callback Function in the Parent Component:**
+   In the parent component, define a function that will receive data from the child component.
+
+```javascript
+   // ParentComponent.js
+   import React, { useState } from 'react';
+   import ChildComponent from './ChildComponent';
+
+   const ParentComponent = () => {
+     const [childData, setChildData] = useState('');
+
+     // Callback function to receive data from the child
+     const receiveDataFromChild = (dataFromChild) => {
+       setChildData(dataFromChild);
+     };
+
+     return (
+       <div>
+         <h2>Parent Component</h2>
+         <p>Data from Child: {childData}</p>
+         <ChildComponent sendDataToParent={receiveDataFromChild} />
+       </div>
+     );
+   };
+
+   export default ParentComponent;
+   ```
+
+2. **Call the Callback Function in the Child Component:**
+   In the child component, receive the callback function as a prop and call it when you want to pass data to the parent.
+
+   ```jsx
+   // ChildComponent.js
+   import React, { useState } from 'react';
+
+   const ChildComponent = ({ sendDataToParent }) => {
+     const [childInput, setChildInput] = useState('');
+
+     const handleChange = (e) => {
+       setChildInput(e.target.value);
+     };
+
+     const sendDataToParentOnClick = () => {
+       // Call the callback function with the data
+       sendDataToParent(childInput);
+     };
+
+     return (
+       <div>
+         <input type="text" value={childInput} onChange={handleChange} />
+         <button onClick={sendDataToParentOnClick}>Send Data to Parent</button>
+       </div>
+     );
+   };
+
+   export default ChildComponent;
+   ```
+
+In this example, the `ParentComponent` passes the `receiveDataFromChild` function to the `ChildComponent` as the prop `sendDataToParent`. When the user enters data in the input field in the `ChildComponent` and clicks the button, the `sendDataToParentOnClick` function is called, and it invokes the callback function provided by the parent, passing the data from the child to the parent.
+
 
 
 ## Conditional Rendering
@@ -1918,6 +1984,409 @@ const UseRefHook = () => {
 export default UseRefHook
 ```
 
+## React.memo()
+
+In software development, we’re generally obsessed with performance gains and how to make our applications perform faster to give users a better experience.
+
+### What is memoization?
+In simple terms, memoization is a process that allows us to cache the values of recursive/expensive function calls so that the next time the function is called with the same argument(s), the cached value is returned rather than having to re-compute the function.
+
+This ensures that our applications run faster because we avoid the time it would usually take to re-execute the function by returning a value that’s already stored in memory.
+
+### What is React.memo()?
+React.memo() was released with React v16.6. While class components already allowed you to control re-renders with the use of PureComponent or shouldComponentUpdate, React 16.6 introduced the ability to do the same with functional components.
+```javascript
+//Parent.js
+
+import React, { useState } from 'react'
+import DisplayTodo from './DisplayTodo';
+
+const Parent = () => {
+    console.log("parent component rendered")
+    const [todo,setTodo] = useState([
+        {id:1,content:"walking"},
+        {id:2,content:"coding"}
+    ]);
+
+    const[text,setText] = useState("")
+
+    const handleTodo=()=>{
+        let newTodo = {
+            id:3, content: text
+        };
+        setTodo([...todo,newTodo])
+    }
+
+  return (
+    <div>
+        <input type='text' value={text} onChange={(e)=>setText(e.target.value)}/>
+        <button onClick={handleTodo}>Add </button>
+        <DisplayTodo todo ={todo}/> 
+    </div>
+  )
+}
+
+export default Parent
+```
+```javascript
+//DisplayTodo.js
+
+import React from 'react'
+import TodoItem from './TodoItem'
+
+const DisplayTodo = React.memo(({todo}) => {
+    console.log("display todo rendered")
+  return (
+    
+        <>
+        <ul>
+        {todo.map((item)=>(
+            <TodoItem key={item.id} item={item}/>
+        ))}
+        </ul>
+        </>
+  )
+})
+
+export default DisplayTodo
+```
+```javascript
+//TodoItem.js
+import React from 'react'
+
+const TodoItem = React.memo(({item}) => {
+    console.log("Todo item rendered")
+  return <li>{item.content}</li>
+})
+
+export default TodoItem
+```
+
+In this code 
+- `React.memo` is used in `DisplayTodo` and `TodoItem` to optimize performance by preventing unnecessary re-renders if the props haven't changed.
+- Unique keys are provided to each todo item when mapping through the array in `DisplayTodo` to help React efficiently update the virtual DOM.
+
+In summary, this React application allows users to add todo items through a form in the `Parent` component, and the added items are displayed in a list through the `DisplayTodo` component, with each item rendered by the `TodoItem` component. The use of React memoization helps optimize the rendering performance of the components.
+
+
+## useMemo()
+
+useMemo is a React hook that allows you to memoize the result of a function, and recompute the result only when the dependencies of the function have changed.
+
+In simple terms, useMemo can be used to optimize the performance of your React components by avoiding unnecessary re-renders.
+
+```javascript
+function App() {
+  const [a, setA] = useState(0);
+  const [b, setB] = useState(0);
+
+  const result = useMemo(() => {
+    console.log('Calculating result...');
+    return a+b;
+  }, [a,b]);
+
+  return (
+    <div>
+      <p>Result: {result}</p>
+      <button onClick={()=>setA(a+1)}>Increment A</button>
+      <button onClick={()=>setB(b+1)}>Increment B</button>
+    </div>
+  );
+}
+```
+Output:
+![useMemo](./image%20(5).png)
+
+In this example, we use useMemo to compute the sum of a and b, and store the result in the result variable. The useMemo function takes a callback function as its first argument, which is the function that we want to memoize. 
+
+The second argument is an array of dependencies that useMemo will use to determine when to recompute the result.
+
+useMemo can be used for more complex computations as well. For example, if you have a component that does a lot of expensive calculations, you can use useMemo to avoid recalculating those values every time the component re-renders.
+
+
+
+> In summary, useMemo is a React hook that can be used to memoize the result of a function and optimize the performance of your components. By avoiding unnecessary re-renders, you can create faster and more efficient React applications.
+
+## useCallback
+
+useCallback will return a memoized version of the callback that only changes if one of the dependencies has changed. This is useful when passing callbacks to optimized child components that rely on reference equality to prevent unnecessary renders.
+
+In simple terms, useCallback can be used to optimize the performance of your React components by avoiding unnecessary re-renders of child components.
+
+```javascript
+import React, { useCallback, useEffect, useState } from 'react'
+import UseCallbackChild from './UseCallbackChild'
+
+const UseCallback = () => {
+
+  const [count,setCount] = useState(0)
+  const [count2,setCount2] = useState(0)
+    
+    const handleClick=useCallback(()=>{
+        console.log('Button clicked')
+        return count
+    },[count])
+
+    useEffect(()=>{
+        console.log('parent component')
+    })
+
+  return (
+    <div>
+        <h2>multicount:{handleClick}</h2>
+        <h2>Count:{count}</h2>
+        <button onClick={()=>setCount(count+1)}>Click</button>
+        <h2>Count:{count2}</h2>
+        <button onClick={()=>setCount2(count2+1)}>Click</button>
+        <UseCallbackChild />
+    </div>
+  )
+}
+
+export default UseCallback
+```
+
+```javascript
+//UseCallbackChild.js
+
+import React, { useEffect } from 'react'
+
+const UseCallbackChild = React.memo(({click}) => {
+
+    useEffect(()=>{
+        console.log('child component')
+    })
+
+  return (
+    <div>
+        <button onClick={click}>Click</button>
+    </div>
+  )
+})
+
+export default UseCallbackChild
+```
+
+In this example, we use useCallback to memoize the `handleClick` function that is passed as a prop to the ChildComponent. The useCallback function takes a callback function as its first argument, which is the function that we want to memoize. The second argument is an array of dependencies that useCallback will use to determine when to re-create the function.
+
+In this case, the handleClick function is only re-created when the count state changes. This means that if the handleClick function is passed as a prop to a child component, and that child component re-renders, the handleClick function will not be re-created unless the count state changes.
+
+### Advantage:
+useCallback can be useful when you have a function that is passed down to multiple child components, and you want to avoid unnecessary re-renders of those components. By memoizing the function, you can ensure that it is only re-created when necessary, which can improve the performance of your React components.
+
+> In summary, useCallback is a React hook that can be used to memoize a function and optimize the performance of your components. By avoiding unnecessary re-creation of functions, you can create faster and more efficient React applications.
+
+
+## useReducer
+**useReducer** is a React hook that provides a way to manage complex state logic in functional components. It is an alternative to `useState` for managing state that involves multiple sub-values or when the next state depends on the previous one.
+It does very similiar to setState, It's a different way to manage state using Redux Pattern. Instead of updating the state directly, we dispatch actions, that go to a reducer function, and this function figure out, how to compute the next state.
+
+###  Uses of useReducer:
+
+- **Managing Complex State Logic:** useReducer is particularly useful when the state logic becomes complex, involving multiple sub-values or requiring computation to determine the next state.
+
+- **State Transitions:** It helps in handling more advanced state transitions by providing a function that takes the current state and an action, and returns the new state.
+
+- **Local Component State:** While `useState` is often sufficient for local component state, useReducer can be more suitable when dealing with complex state management.
+
+
+###  Difference Between useState and useReducer:
+
+- **useState:**
+  - Simple and straightforward for managing local component state.
+  - Suitable for managing independent and atomic state variables.
+  - Good for basic scenarios where state transitions are simple.
+
+- **useReducer:**
+  - More suitable for complex state logic and when state transitions involve multiple sub-values.
+  - Reducer function takes the current state and an action, returns the new state.
+  - Better for managing state in a more predictable and scalable way.
+
+```javascript
+import React,{useReducer} from 'react'
+
+const initialState  = 0;
+
+const reducer=(state,action)=>{
+    if(action.type==="increment"){
+        return state+1
+    }
+    if(action.type==="decrement"){
+        return state-1
+    }
+    if(action.type==="reset"){
+        return 0
+    }
+}
+
+const Demo = () => {
+
+    const[state,dispatch]  = useReducer(reducer,initialState)
+
+  return (
+    <div>
+        <h1>{state}</h1>
+        <button onClick={()=>dispatch({type:"increment"})}>INC</button>
+        <button onClick={()=>dispatch({type:"decrement"})}>DEC</button>
+        <button onClick={()=>dispatch({type:"reset"})}>Reset</button>
+    </div>
+  )
+}
+
+export default Demo
+
+```
+
+```javascript
+import React, { useReducer } from 'react';
+
+// Reducer function
+const counterReducer = (state, action) => {
+  switch (action.type) {
+    case 'INCREMENT':
+      return { count: state.count + 1 };
+    case 'DECREMENT':
+      return { count: state.count - 1 };
+    case 'RESET':
+      return { count: 0 };
+    default:
+      return state;
+  }
+};
+
+const CounterComponent = () => {
+  // useReducer returns current state and dispatch function
+  const [state, dispatch] = useReducer(counterReducer, { count: 0 });
+
+  const handleIncrement = () => {
+    dispatch({ type: 'INCREMENT' });
+  };
+
+  const handleDecrement = () => {
+    dispatch({ type: 'DECREMENT' });
+  };
+
+  const handleReset = () => {
+    dispatch({ type: 'RESET' });
+  };
+
+  return (
+    <div>
+      <h2>Count: {state.count}</h2>
+      <button onClick={handleIncrement}>Increment</button>
+      <button onClick={handleDecrement}>Decrement</button>
+      <button onClick={handleReset}>Reset</button>
+    </div>
+  );
+};
+
+export default CounterComponent;
+
+```
+
+
+```javascript
+ function App() { 
+  const initial = 0; 
+  const reducer = (state, action) => { 
+    switch (action) { 
+      case "add": return state + 1; 
+      case "sub": return state - 1; 
+      case "reset": return 0; 
+      default: return 0; 
+    } 
+  } 
+  const [value, dispatch] = useReducer(reducer, initial) return ( 
+    <div> 
+    <h2>{value}</h2> 
+    <button onClick={() => dispatch("add")}>Add</button> 
+    <button onClick={() => dispatch("sub")}>subtract</button> 
+    <button onClick={() => dispatch("reset")}>reset</button> 
+    </div> 
+    ); 
+  }
+```
+
+![usereducer](./image%20(8).png)
+In this example,
+The component initializes a constant `initial` with a value of 0. This is the initial value for the state managed by the `useReducer` hook. The component also defines a *reducer function, which takes in the current state and an action object, and returns a new state based on the action.*
+
+The reducer function used in this component has a switch statement that checks the type of action passed in, and returns the updated state based on the action. In this case, there are three possible actions: "add", "sub", and "reset". 
+
+If the action is "add", the reducer returns the current state plus one. If the action is "sub", the reducer returns the current state minus one. If the action is "reset", the reducer returns the initial value of 0.
+
+The `useReducer` hook is used to initialize a state variable called value with the initial value of 0, and a `dispatch` function that allows you to dispatch actions to the reducer. The `useReducer` hook takes two arguments: the reducer function and the initial state value.
+
+The component returns a `div` that contains an `h2` element that displays the current value of `value`, and three buttons that dispatch the corresponding actions to the reducer when clicked. 
+
+When the buttons are clicked, the `dispatch` function is called with the appropriate action object, and the useReducer hook updates the state based on the action. The h2 element is re-rendered with the updated value of value.
+
+
+
+## How to make Custom Hooks?
+In many cases, if you want to add a certain feature to your application, you can simply install a third-party library that is made to solve your problem. But if such a library or hook doesn't exist? Then it's important to learn the process of creating custom hooks to solve problems or add missing features within your own React projects.
+
+## *useCustomCounter* Hook
+
+```javascript
+//useCustomCounter.js
+
+import React ,{useEffect, useState} from 'react'
+
+const useCustomCounter = (initialValue,componentName) => {
+    const [counter,setCounter] = useState(initialValue)
+    
+    function counterApp(){
+        setCounter(counter+1)
+    }
+    useEffect(()=>{
+        console.log(componentName+"is clicked"+counter+"times")
+    },[counter,componentName])
+
+  return counterApp;
+}
+
+export default useCustomCounter;
+```
+```javascript
+//FirstComponent.js
+import React from 'react'
+import useCustomCounter from './UseCustomCounter'
+
+const FirstComponent = () => {
+
+    const clickedOne = useCustomCounter(0,"FirstComponent")
+
+  return (
+    <div>
+        <h2>This is my first component</h2>
+        <button onClick={clickedOne}>Click</button>
+    </div>
+  )
+}
+
+export default FirstComponent
+```
+
+```javascript
+// SecondComponent.js
+
+import React from 'react'
+import useCustomCounter from './UseCustomCounter'
+
+const SecondComponent = () => {
+
+    const counterTwo = useCustomCounter(2,"secondComponent") 
+  return (
+    <div>
+        <h2>This is my second component</h2>
+        <button onClick={counterTwo}>Click</button>
+    </div>
+  )
+}
+
+export default SecondComponent
+```
 
 
 ## *DAY-9*
@@ -1988,11 +2457,8 @@ const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <BrowserRouter>
-
     <App />
-    
     </BrowserRouter>
-
   </React.StrictMode>
 );
 ```
@@ -2769,3 +3235,769 @@ const ChildOne = () => {
 
 export default ChildOne
 ```
+
+
+
+# Axio Vs Fetch
+
+**Axios :**
+
+* Axios is a popular JavaScript library for making HTTP requests. It supports various HTTP methods, including GET, POST, PUT, and DELETE, allowing you to interact with APIs and fetch or send data. Below, I'll provide examples for each HTTP method using Axios and explain when to use each method.
+
+* Axios is a Javascript library used to make HTTP requests from node.js or XMLHttpRequests from the browser and it supports the Promise API that is native to JS ES6. 
+* It can be used intercept HTTP requests and responses and enables client-side protection against XSRF. It also has the ability to cancel requests.   EX: axios.get('url') .then((response) => 
+
+**Fetch:**
+
+* The Fetch API provides a fetch() method defined on the window object. It also provides a JavaScript interface for accessing and manipulating parts of the HTTP pipeline (requests and responses). 
+* The fetch method has one mandatory argument- the URL of the resource to be fetched. This method returns a Promise that can be used to retrieve the response of the request. EX:: fetch('path-to-the-resource-to-be-fetched') .then((response) => { 
+  
+### **Q. What is HTTP ?**
+HTTP (Hypertext Transfer Protocol) is a protocol that is used to transfer hypertext from client end to server end .
+
+**What are HTTP request Methods ?**
+* Get: This method retrieves information from a given server using a given URL
+* Post: Post method sends the data to server Example: need to update the phone number of user we will use post method
+* Put: It is used to replace all current representations of target resources with uploaded content
+* Delete: It is used to remove all the current representations of the target resource which is given by URL
+
+
+  
+|Axios |Fetch|
+|:-----|:----|
+|Axios has url in request object. |Fetch has no url in request object.|
+|Axios is a stand-alone third party package that can be easily installed.| Fetch is built into most modern browsers; no installation is required as such.|
+|Axios enjoys built-in XSRF protection.| Fetch does not. |
+|Axios uses the data property. |Fetch uses the body property. |
+|Axios’ data contains the object.| Fetch’s body has to be stringified.|
+|Axios request is ok when status is 200 and statusText is ‘OK’. |Fetch request is ok when response object contains the ok property. |
+|Axios performs automatic transforms of JSON data. |Fetch is a two-step process when handling JSON data- first, to make the actual request; second, to call the .json() method on the response. |
+|Axios allows cancelling request and request timeout.| Fetch does not.|
+|Axios has the ability to intercept HTTP requests. |Fetch, by default, doesn’t provide a way to intercept requests. |
+|Axios has built-in support for download progress. |Fetch does not support upload progress.|
+
+
+### axios and fetch are both used for making HTTP requests to servers, but they have some differences. Here are some of the main differences:
+
+1. **Syntax:** axios uses a simple syntax and provides a higher level of abstraction over the XMLHttpRequest object. On the other hand, fetch uses a lower-level syntax and requires more configuration to use effectively.
+
+2. **Error Handling:** axios handles errors better than fetch. In axios, any response code that falls outside the range of 2xx will trigger an error, which can be easily handled using a catch block. In fetch, a response with a 404 or 500 status code will still resolve successfully, requiring additional checking of the response status.
+
+3. **Cross-Origin Requests:** axios automatically includes credentials and headers for cross-origin requests, whereas with fetch you need to manually set the mode and credentials to include.
+
+Here's an example of how to use `axios` to make a GET request:
+
+```javascript
+import axios from 'axios';
+
+axios.get('https://jsonplaceholder.typicode.com/todos/1')
+  .then(response => {
+    console.log(response.data);
+  })
+  .catch(error => {
+    console.log(error);
+  });
+```
+
+And here's an example of how to use `fetch` to make a GET request:
+
+```javascript
+fetch('https://jsonplaceholder.typicode.com/todos/1')
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    return response.json();
+  })
+  .then(data => {
+    console.log(data);
+  })
+  .catch(error => {
+    console.log(error);
+  });
+```
+As you can see, the axios code is simpler and easier to read, and the error handling is more straightforward. The fetch code requires additional error checking and handling, making it slightly more complex.
+
+
+### 1. GET Method:
+
+The GET method is used to retrieve data from a specified resource. It should only retrieve data and should not have any other effect.
+
+**Example: Fetching a List of Users**
+
+```jsx
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+
+const AxiosComp = () => {
+  const [posts, setPosts] = useState([]);
+
+  useEffect(() => {
+    // Use axios.get instead of client.get
+    axios.get('https://jsonplaceholder.typicode.com/posts?_limit=10')
+      .then((response) => {
+        setPosts(response.data);
+      })
+      .catch((error) => {
+        console.error('Axios Error:', error);
+      });
+  }, []);
+
+  return (
+    <>
+      <h1>Axios Comp</h1>
+      {/* Render your posts data here */}
+      {posts.map((post) => (
+        <div key={post.id}>
+          <h2>{post.title}</h2>
+          <p>{post.body}</p>
+        </div>
+      ))}
+    </>
+  );
+};
+
+export default AxiosComp;
+
+```
+
+**Use Cases:**
+- Retrieving a list of products from an e-commerce website.
+- Fetching user information for a profile page.
+- Getting the latest news articles from a news API.
+
+### 2. POST Method:
+
+The POST method is used to submit data to be processed to a specified resource. It is often used when uploading a file or submitting a form.
+
+**Example: Creating a New User**
+
+```jsx
+import React, { useState } from "react";
+import axios from "axios";
+
+const AxiosPostExample = () => {
+  const [newPost, setNewPost] = useState({
+    title: "",
+    body: ""
+  });
+
+  const handleCreatePost = () => {
+    // Make a POST request to create a new post
+    axios.post('https://jsonplaceholder.typicode.com/posts', newPost)
+      .then((response) => {
+        console.log('Axios POST Response:', response.data);
+      })
+      .catch((error) => {
+        console.error('Axios POST Error:', error);
+      });
+  };
+
+  return (
+    <>
+      <h1>Axios POST Example</h1>
+      <div>
+        <label>Title:</label>
+        <input
+          type="text"
+          value={newPost.title}
+          onChange={(e) => setNewPost({ ...newPost, title: e.target.value })}
+        />
+      </div>
+      <div>
+        <label>Body:</label>
+        <textarea
+          value={newPost.body}
+          onChange={(e) => setNewPost({ ...newPost, body: e.target.value })}
+        />
+      </div>
+      <button onClick={handleCreatePost}>Create Post</button>
+    </>
+  );
+};
+
+export default AxiosPostExample;
+
+```
+
+**Use Cases:**
+- Creating a new user account.
+- Submitting a form with user input data.
+- Uploading an image or file.
+
+### 3. PUT Method:
+
+The PUT method is used to update a resource or create a new resource if it doesn't exist. It replaces the entire resource with the new data.
+
+**Example: Updating User Information**
+
+```jsx
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+
+const AxiosPutExample = () => {
+  const [post, setPost] = useState(null);
+
+  useEffect(() => {
+    // Fetch an initial post for demonstration purposes
+    axios.get('https://jsonplaceholder.typicode.com/posts/1')
+      .then((response) => {
+        setPost(response.data);
+      })
+      .catch((error) => {
+        console.error('Axios GET Error:', error);
+      });
+  }, []);
+
+  const handleUpdatePost = () => {
+    if (!post) {
+      console.error('No post data to update.');
+      return;
+    }
+
+    // Update the title of the post using axios.put
+    axios.put(`https://jsonplaceholder.typicode.com/posts/${post.id}`, {
+      title: 'Updated Post Title',
+    })
+      .then((response) => {
+        setPost(response.data);
+        console.log('Axios PUT Response:', response.data);
+      })
+      .catch((error) => {
+        console.error('Axios PUT Error:', error);
+      });
+  };
+
+  return (
+    <>
+      <h1>Axios PUT Example</h1>
+      {post && (
+        <div>
+          <h2>{post.title}</h2>
+          <p>{post.body}</p>
+        </div>
+      )}
+      <button onClick={handleUpdatePost}>Update Post Title</button>
+    </>
+  );
+};
+
+export default AxiosPutExample;
+
+```
+
+**Use Cases:**
+- Updating user profile information.
+- Modifying the details of a specific product.
+- Editing the content of a blog post.
+
+### 4. DELETE Method:
+
+The DELETE method is used to request that a resource be removed or deleted.
+
+**Example: Deleting a Post**
+
+```jsx
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+
+const AxiosDeleteExample = () => {
+  const [posts, setPosts] = useState([]);
+
+  useEffect(() => {
+    // Fetch initial posts for demonstration purposes
+    axios.get('https://jsonplaceholder.typicode.com/posts?_limit=5')
+      .then((response) => {
+        setPosts(response.data);
+      })
+      .catch((error) => {
+        console.error('Axios GET Error:', error);
+      });
+  }, []);
+
+  const handleDeletePost = (postId) => {
+    // Make a DELETE request to delete a post
+    axios.delete(`https://jsonplaceholder.typicode.com/posts/${postId}`)
+      .then(() => {
+        // Update the state to remove the deleted post
+        setPosts(posts.filter(post => post.id !== postId));
+        console.log(`Post with ID ${postId} deleted`);
+      })
+      .catch((error) => {
+        console.error('Axios DELETE Error:', error);
+      });
+  };
+
+  return (
+    <>
+      <h1>Axios DELETE Example</h1>
+      {posts.map((post) => (
+        <div key={post.id}>
+          <h2>{post.title}</h2>
+          <button onClick={() => handleDeletePost(post.id)}>Delete Post</button>
+        </div>
+      ))}
+    </>
+  );
+};
+
+export default AxiosDeleteExample;
+
+```
+
+**Use Cases:**
+- Deleting a user account.
+- Removing a product from a shopping cart.
+- Deleting a comment from a discussion thread.
+
+### Summary:
+
+- **GET:** Retrieving data. Safe and idempotent (multiple identical requests have the same effect as a single request).
+- **POST:** Creating a new resource or submitting data. Not idempotent.
+- **PUT:** Updating or creating a resource. Idempotent.
+- **DELETE:** Deleting a resource. Idempotent.
+
+Choose the appropriate method based on the operation you want to perform, considering the characteristics of each method and the RESTful principles.
+
+
+## Memory Leak
+
+In React, a memory leak can occur when a component allocates memory and fails to release it after it's no longer needed. This can lead to an accumulation of unused memory, which can cause performance issues and even crash the application.
+
+**Here are a few scenarios in which memory leaks can occur in React:**
+
+1. **Improper use of state and props:** When a component's state or props are updated frequently, it can lead to a buildup of memory. For example, if a component has a setInterval() method that updates the state every second, the state object will keep growing, eventually leading to a memory leak.
+
+2. **Event listeners:** When a component registers event listeners, such as mouse clicks or key presses, it can create a memory leak if it doesn't remove the listeners when the component is unmounted. This can cause the event listeners to accumulate, leading to memory issues.
+
+3. **Improper use of useEffect():** The useEffect() hook is used to perform side effects in functional components. If the hook is not used correctly, it can lead to memory leaks. For example, if a component sets up a timer in useEffect() and doesn't clear it when the component unmounts, the timer will continue running, causing a memory leak.
+
+**To prevent memory leaks in React, it's important to follow best practices, such as:**
+
+* Use the useMemo() hook to memoize expensive calculations and prevent unnecessary re-renders.
+
+* Use the useCallback() hook to memoize event handlers and prevent unnecessary re-renders.
+
+* Use the useRef() hook to create references that persist across renders.
+
+* Use the useEffect() hook to clean up any resources, such as event listeners or timers, when the component unmounts.
+
+By following these best practices, you can prevent memory leaks in your React applications and ensure optimal performance.
+
+
+
+# State Management
+
+## The Four Kinds of React State to Manage :
+When we talk about state in our applications, it’s important to be clear about what types of state actually matter.
+
+There are four main types of state you need to properly manage in your React apps:
+
+1. Local state
+2. Global state
+3. Server state
+4. URL state
+
+
+
+### **Local (UI) state** – 
+* Local state is data we manage in one or another component.
+* Local state is most often managed in React using the useState hook.
+* For example, local state would be needed to show or hide a modal component or to track values for a form component, such as form submission, when the form is disabled and the values of a form’s inputs.
+
+### **Global (UI) state** – 
+* Global state is data we manage across multiple components.
+* Global state is necessary when we want to get and update data anywhere in our app, or in multiple components at least.
+* A common example of global state is authenticated user state. If a user is logged into our app, it is necessary to get and change their data throughout our application.
+* Sometimes state we think should be local might become global.
+
+### **Server state** – 
+* Data that comes from an external server that must be integrated with our UI state.
+* Server state is a simple concept, but can be hard to manage alongside all of our local and global UI state.
+* There are several pieces of state that must be managed every time you fetch or update data from an external server, including loading and error state.
+* Fortunately there are tools such as SWR and React Query that make managing server state much easier.
+
+### **URL state** – 
+* Data that exists on our URLs, including the pathname and query parameters.
+
+* URL state is often missing as a category of state, but it is an important one.
+* In many cases, a lot of major parts of our application rely upon accessing URL state. Try to imagine building a blog without being able to fetch a post based off of its slug or id that is located in the URL!
+
+
+# 1. Redux
+
+## a. Redux Introduction:
+
+**Redux** is a state management library commonly used with React applications. It helps manage the state of your application in a predictable way, making it easier to debug and maintain.
+
+In Redux, the state of your entire application is stored in a single **store**. The only way to change the state is by dispatching **actions**. Actions describe the changes that you want to make, and **reducers** handle those changes based on the current state and the action dispatched.
+
+###  Why Use Redux and Its Advantages:
+
+- **Predictable State:** Redux provides a predictable state container. The state changes in a controlled and predictable manner, making it easier to reason about your application's behavior.
+
+- **Centralized State:** All your application's state is stored in a single store, making it easier to manage and debug.
+
+- **Debugging:** With tools like Redux DevTools, you can track every state change and action, making debugging more straightforward.
+
+- **Middleware:** Redux allows you to use middleware to extend its functionality, like handling asynchronous operations.
+
+- **Simplified Code:**- Redux Toolkit provides a simplified API for creating and managing Redux stores. It also includes a number of utilities for common Redux tasks, such as creating reducers, handling asynchronous actions, and creating immutable state.
+
+- **Improved Developer Experience:-**  Redux Toolkit comes with helpful development tools, including an integration with the Redux DevTools Extension, which makes it easier to debug and inspect the state of your application.
+
+- Performance Optimization: -
+
+Redux Toolkit includes a utility called "createSlice" that automatically generates optimized Redux reducer functions based on the initial state and action types you provide. This can help improve performance by reducing the amount of unnecessary work done by your reducers.
+
+IV. Improved Type Safety:-
+
+ Redux Toolkit comes with built-in TypeScript types, which can help catch errors at compile time rather than runtime. This can improve the stability and maintainability of your codebase.
+
+V. Scalability:-
+
+ Redux Toolkit makes it easier to manage complex Redux applications by providing a clear and consistent architecture for managing application state. This can help you scale your application as it grows and becomes more complex.
+
+#### c. Difference Between Context API and Redux:
+
+**Context API:**
+- Context API is a part of React itself, used for managing the state across the component tree.
+- Suitable for simpler state management within components or small to medium-sized applications.
+- Does not provide middleware support for complex state operations.
+
+**Redux:**
+- A separate library focused solely on state management.
+- Ideal for larger applications where state needs to be shared across many components.
+- Offers middleware support for handling asynchronous actions and complex state logic.
+
+#### d. Redux Toolkit Introduction and Principles:
+
+**Redux Toolkit:**
+- A set of tools and guidelines to simplify Redux development.
+- Encourages best practices and a standardized way of writing Redux code.
+- Includes utilities like `createSlice` for defining reducers and `configureStore` for creating the store.
+
+#### f. Difference Between Redux and Redux Toolkit:
+
+**Redux:**
+- Requires writing more boilerplate code for actions and reducers.
+- Actions and reducers are defined separately.
+- No built-in utilities for creating slices or handling immutable updates.
+
+**Redux Toolkit:**
+- Simplifies Redux code by providing utilities like `createSlice`.
+- Promotes a standardized file structure.
+- Encourages the use of immutability for state updates.
+
+# REDUX Toolkit
+
+Redux Toolkit is a set of libraries and tools that make it easier to manage state in React applications using Redux. 
+
+It provides a simpler API for creating and managing Redux stores, includes helpful development tools, improves performance optimization, improves type safety, and provides a clear and consistent architecture for managing application state. 
+
+Overall, Redux Toolkit helps streamline the development process and improve the performance, maintainability, and scalability of your React applications that use Redux.
+
+Store:
+The Redux store is the main, central bucket which stores all the states of an application. It should be considered and maintained as a single source of truth for the state of the application.
+
+Action: (what to do)
+The only way to change the state is to emit an action, which is an object describing what happened
+
+reducers:(How to do)
+Reducers, as the name suggests, take in two things: previous state and an action. Then they reduce it (read it return) to one entity: the new updated instance of state.
+
+So reducers are basically pure JS functions which take in the previous state and an action and return the newly updated state.
+
+I like to think of a reducer like a “coffee maker”. The coffee maker takes in coffee powder and water. It then returns a freshly brewed cup of coffee that we can enjoy. Based on this analogy reducers are functions that take in the current state (coffee powder) and actions (water) and brew a new state (fresh coffee).
+
+
+
+> **Redux is a global state** 
+
+> **You may need Redux if you don't want to do props drilling (passing props too deep).**
+
+
+![redux](https://www.ceos3c.com/wp-content/uploads/2022/01/redux-toolkit-2.gif)
+
+
+### Data flow in Redux
+Redux follows a unidirectional data flow. Redux has 3 major components: ‘actions’, ‘reducers’ and the ‘store’.
+![redux dataflow](https://www.eternussolutions.com/wp-content/uploads/2020/12/redux-2.png)
+
+
+
+Here is a simple example of how to implement and what are ther step of redux.
+
+**->** Firstly Install the required packages:-
+
+  Install the redux and react-redux packages along with redux-toolkit package in your React application using npm.
+```javascript
+npm install redux react-redux @reduxjs/toolkit
+```
+
+
+**->** **react Redux reducers:-**
+
+ Create your reducers using the `createSlice` function provided by Redux Toolkit. This function generates a `reducer` function for you, based on the initial state and the actions you define.
+
+
+// countSlice.js
+```javascript
+import { createSlice } from '@reduxjs/toolkit';
+
+const counterSlice = createSlice({
+  name: 'counter',
+  initialState: 0,
+  reducers: {
+    increment: (state) => state + 1,
+    decrement: (state) => state - 1,
+    reset: () => 0,
+  },
+});
+
+export const { increment, decrement, reset } = counterSlice.actions;
+export default counterSlice.reducer;
+
+```
+const countSlice = createSlice({...}): This line uses the `createSlice` function to define a new slice of the store called "count". The `createSlice` function takes an object with several properties:
+
+~name: A string name for the slice.
+
+~initialState: The initial state of the slice.
+
+~reducers: An object with functions that define how the slice should respond to actions that are dispatched to the store.
+reducers: {...}: This section defines the two reducers for the "count" slice:
+
+~ add: This reducer takes the current state and a `payload` argument (which is the value passed to the action) and returns a new state with the `payload` value added to it.
+
+> **Payload:-** While action types allow you tell your reducer what action it should take, the payload is the data that your reducer will use to update the state. This lesson shows you how to pass an action payload along with your action type to update the state.
+
+~ reset: This reducer takes the current state and sets it back to the initial state.
+
+~ *export const { add, reset } = countSlice.actions;*
+
+ This line exports the add and reset action creators from the "count" slice. These action creators are functions that return action objects with a type property and a payload property (if applicable).
+
+~ *export default countSlice.reducer:-*
+ This line exports the "count" slice's reducer function, which takes the current state and an action object and returns the new state.
+
+
+**->** **Create a Redux store:-**
+
+ In your store.js file, create a Redux store using the `configureStore` function provided by Redux Toolkit. This function takes an object with a reducer property and an optional middleware property.
+
+ > **configureStore** is only accepting one parameter, which is an Object, which is called ConfigureStoreOptions.
+
+// store.js
+```javascript
+import { configureStore } from '@reduxjs/toolkit';
+import counterReducer from './counterSlice';
+
+const store = configureStore({
+  reducer: {
+    counter: counterReducer,
+  },
+});
+
+export default store;
+
+```
+import countReducer from './countSlice';: This line imports the "count" slice's reducer function from the countSlice.js file.
+
+*const store = configureStore({...}):-*
+
+ This line uses the `configureStore` function to create a new Redux store. The `configureStore` function takes an object with several properties:
+
+> **reducer**: An object with key-value pairs where the keys are the names of the slices in the store and the values are the reducer functions for those slices.
+
+reducer: {...}: This section defines the reducers for the store. In this case, there is only one slice called "count", so the `countReducer` function is associated with it.
+
+**->** **This code sets up the Redux store for use in the React app:**
+
+ In index.js file, import Provider from react-redux. The Provider component from the react-redux library is used to provide the Redux store to the app. The store object is imported from the ./store file.
+
+// index.js
+```javascript
+import React from 'react';
+import ReactDOM from 'react-dom';
+import App from './App';
+
+import { Provider } from 'react-redux';
+import store from './store';
+
+ReactDOM.render(
+  <Provider store={store}>
+    <App />
+  </Provider>,
+  document.getElementById('root')
+);
+```
+
+**->** **Connect Redux to React components:**
+
+ Use the `useSelector` and `useDispatch` hooks provided by the react-redux package to connect your React components to the Redux store.
+
+// App.js
+```javascript
+import React from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { increment, decrement, reset } from './counterSlice';
+
+const App = () => {
+  const counter = useSelector((state) => state.counter);
+  const dispatch = useDispatch();
+
+  const handleIncrement = () => {
+    dispatch(increment());
+  };
+
+  const handleDecrement = () => {
+    dispatch(decrement());
+  };
+
+  const handleReset = () => {
+    dispatch(reset());
+  };
+
+  return (
+    <div>
+      <h2>Counter: {counter}</h2>
+      <button onClick={handleIncrement}>Increment</button>
+      <button onClick={handleDecrement}>Decrement</button>
+      <button onClick={handleReset}>Reset</button>
+    </div>
+  );
+};
+
+export default App;
+
+```
+
+Output:
+![redux](./image%20(12).png)
+
+This code defines the App component, which displays the current count and two buttons to add to the count and reset it. The `useSelector` hook is used to extract the count state from the Redux store. The `useDispatch` hook is used to dispatch the add and reset actions to modify the count state.
+
+> **useSelector:** 
+* useSelector and useDispatch are two hooks provided by the react-redux library that are commonly used in conjunction with Redux Toolkit to manage state in a React application.
+* useSelector is used to select data from the Redux store. It takes a function as an argument that defines how to extract the data from the store, and returns the selected data.
+
+>**useDispatch:** 
+* useDispatch is used to dispatch actions to the Redux store. It returns a reference to the dispatch function.
+* if we want to modify the global state we need to useDispatch and the action that we already created in slice.
+
+
+### Summary:
+we have 6 steps to implement the Redux Toolkit to our react project:
+
+* Install Redux Toolkit and React-Redux Packages
+* Create a Redux Store
+* Include the Redux Store to App.js parent
+* Create a Redux State Slice
+* Add Slice Reducers to the Store
+* Implementing useSelector and useDispatch in React Components
+
+
+## Redux Thunk:
+
+* The most common use case for Redux Thunk is for communicating asynchronously with an external API to retrieve or save data. Redux Thunk makes it easy to dispatch actions that follow the lifecycle of a request to an external API.
+
+* Redux Thunk is middleware that allows you to return functions, rather than just actions, within Redux. This allows for delayed actions, including working with promises.
+
+* One of the main use cases for this middleware is for handling actions that might not be synchronous, for example, using axios to send a GET request. 
+
+* Redux Thunk allows us to dispatch those actions asynchronously and resolve each promise that gets returned.
+
+### Example:
+Suppose you have an application that needs to fetch data from an API and display it in the UI. You can use Redux-thunk to handle asynchronous actions in Redux.
+
+First, you would define your Redux store with the redux-thunk middleware:
+
+```javascript
+import { createStore, applyMiddleware } from 'redux';
+import thunk from 'redux-thunk';
+import rootReducer from './reducers';
+
+const store = createStore(
+  rootReducer,
+  applyMiddleware(thunk)
+);
+export default store
+```
+Next, you would create an action creator that makes an API request and dispatches actions to update the Redux store:
+
+```javascript
+import axios from 'axios';
+
+export const fetchPosts = () => {
+  return (dispatch) => {
+    dispatch({ type: 'FETCH_POSTS_REQUEST' });
+    axios.get('https://jsonplaceholder.typicode.com/posts')
+      .then(response => {
+        const posts = response.data;
+        dispatch({ type: 'FETCH_POSTS_SUCCESS', payload: posts });
+      })
+      .catch(error => {
+        dispatch({ type: 'FETCH_POSTS_FAILURE', error });
+      });
+  };
+};
+```
+In this example, `fetchPosts` is a `thunk` action creator that returns a function instead of an object. The function takes `dispatch` as an argument, which allows it to dispatch multiple actions.
+
+When `fetchPosts` is called, it dispatches a **FETCH_POSTS_REQUEST** action to indicate that the API request is starting. It then makes an API request using the axios library. When the request is successful, it dispatches a **FETCH_POSTS_SUCCESS** action with the response data as the payload. If the request fails, it dispatches a **FETCH_POSTS_FAILURE** action with the error object.
+
+Finally, you would use this action creator in your component to fetch the data and update the Redux store:
+
+```javascript
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchPosts } from './actions';
+
+const Posts = () => {
+  const dispatch = useDispatch();
+  const posts = useSelector(state => state.posts);
+  const isLoading = useSelector(state => state.isLoading);
+
+  useEffect(() => {
+    dispatch(fetchPosts());
+  }, [dispatch]);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  return (
+    <div>
+      {posts.map(post => (
+        <div key={post.id}>
+          <h2>{post.title}</h2>
+          <p>{post.body}</p>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+export default Posts;
+```
+In this example, the Posts component uses the `useDispatch` and `useSelector` hooks from the react-redux library to interact with the Redux store. It dispatches the `fetchPosts` action when the component mounts using the `useEffect` hook. It also uses the `isLoading` state to show a loading indicator while the API request is in progress. Once the request is complete, it displays the fetched data in the UI.
+
+That's a simple example of how Redux-thunk can be used to handle asynchronous actions in Redux.
+
+## Thunk Vs Saga
+
+Saga middleware is a library for handling side effects in React applications using Redux. Side effects are any operations that are not pure functions, such as making API calls, accessing browser storage, or handling asynchronous code. These effects can be difficult to manage in Redux, and Saga provides a way to handle them in a declarative and testable way.
+
+|Redux-Thunk |	Redux-Saga |
+|:-----------|:------------|
+|Less boilerplate code|	More boilerplate code|
+|Easy to understand as compared to redux-saga|	Difficult to understand as there are multiple concepts to learn like generator functions and redux-saga effects|
+|May be difficult to scale up	|Easy to scale as compared to redux-thunk|
+|Action creators may hold too much async logic	|Action creators stay pure|
+|May get difficult to test|	Comparatively easy to test as all your async logic remains together|
+
+> In summary, Thunk is a simple and lightweight library that is good for handling basic asynchronous operations, while Saga is a more powerful and flexible library that can handle more complex async scenarios.
+
+
+
