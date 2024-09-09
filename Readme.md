@@ -285,7 +285,6 @@ This tree-like structure is called the Document Object Model, also known as the 
 
 > DOM manipulation is the heart of the modern, interactive web. Unfortunately, it is also a lot slower than most JavaScript operations.
 > This slowness is made worse by the fact that most JavaScript frameworks update the DOM much more than they have to.
-
 ## Virtual Dom 
 
 * React contains a lightweight representation of real DOM in the memory called Virtual DOM.  
@@ -296,6 +295,10 @@ This tree-like structure is called the Document Object Model, also known as the 
 * Now these two virtual DOMs will get compared with each other and will check for the new changes this complete procedure is known as **`diffing algorithm.`**
 * Now the new changes will be updated in your Real DOM, this procedure is known as **`Recoinciliation`**
 This makes a big difference! React can update only the necessary parts of the DOM. React’s reputation for performance comes largely from this innovation.
+
+
+![alt text](image.png)
+
 
 In summary, here’s what happens when you try to update the DOM in React:
 
@@ -312,6 +315,7 @@ In summary, here’s what happens when you try to update the DOM in React:
 * In a React SPA, the initial HTML page typically only contains a single "div" element, which serves as the entry point for the React application. When the page loads, React renders the initial UI based on the state of the application. As the user interacts with the application, React updates the UI in response to events such as button clicks or form submissions.
 
 * To handle server requests, a React SPA typically uses an API (Application Programming Interface) to communicate with the server. The API provides a set of endpoints that the client-side code can use to fetch or update data. The client-side code sends requests to the server using the Fetch API or other libraries such as Axios or jQuery. When the server responds, the client-side code updates the state of the application and rerenders the UI as needed.
+
 
 > One advantage of using a React SPA is that it can provide a smoother and more responsive user experience compared to traditional web applications, since the page does not need to reload every time the user interacts with it. However, SPAs can be more complex to build and maintain, since they require more client-side code and may require additional server-side infrastructure to support the API.
 
@@ -340,6 +344,7 @@ Overall, JSX and Babel are important tools in the React ecosystem, allowing deve
 
 ## 4. One Way Binding
 * One-way data binding is a data flow mechanism in which the data flows only in one direction, from the data source to the UI element. This means that when the data changes, the UI element that is bound to the data is automatically updated to reflect the new data, but the reverse is not true.
+![Alt text](data-binding.png)
 
 * In one-way data binding, changes made to the UI element do not update the data source. If the user changes a value in the UI, the change is not automatically propagated back to the data source. Instead, the developer must explicitly update the data source based on the new value in the UI.
 > One advantage of one-way data binding is that it can simplify the code and reduce the risk of unintended consequences. Since the data flow is unidirectional, it is easier to reason about the code and to track the source of changes. Additionally, one-way data binding can improve performance by reducing the number of updates that need to be made to the UI.
@@ -2458,7 +2463,7 @@ root.render(
   <React.StrictMode>
     <BrowserRouter>
     <App />
-    </BrowserRouter>
+    </BrowserRouter>   
   </React.StrictMode>
 );
 ```
