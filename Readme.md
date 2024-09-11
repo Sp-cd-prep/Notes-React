@@ -705,7 +705,13 @@ In this example, the `App` component is rendering two instances of the `Greeting
 * To update the state, you need to call the `setState` method.
 * setState method accepts an object that contains the new values of the state properties you want to update.
 * It's important to note that setState is asynchronous, so you should not rely on the current state or props values when updating state.
+
+
+
 Here's an example:
+
+
+
 ```javascript
 class MyComponent extends React.Component {
   constructor(props) {
@@ -735,7 +741,11 @@ class MyComponent extends React.Component {
 * However, you can pass new props to a component by re-rendering it with new prop values.
 * To update props, you need to call the `setState` method of the parent component that passed the props to the child component.
 * When the parent component updates its state, it triggers a re-render of the child component with the new prop values.
+
+
 Here's an example:
+
+
 ```javascript
 class ParentComponent extends React.Component {
   constructor(props) {
@@ -763,7 +773,11 @@ function ChildComponent(props) {
   return <p>Hello {props.name}</p>;
 }
 ```
+
+
 In summary, to update state, you call the setState method with the new state values. To update props, you update the parent component's state, which triggers a re-render of the child component with the new prop values.
+
+
 
 ## Update State and props using functional component
 
@@ -795,6 +809,7 @@ function MyComponent() {
 * Props are read-only and cannot be directly modified by the component that receives them, regardless of whether it is a functional component or a class component.
 * To update props in functional components, you need to pass new prop values from the parent component.
 * When the parent component updates its state, it triggers a re-render of the child component with the new prop values.
+
 Here's an example:
 
 
