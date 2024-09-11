@@ -535,15 +535,88 @@ Here is an example of a function-based component:
 ```javascript
 import React from 'react';
 
-function ExampleComponent(props) {
+function ExampleComponent() {
   return (
     <div>
-      <h1>Hello, {props.name}!</h1>
+      <h1>Hello World!</h1>
     </div>
   );
 }
 ```
-In this example, we define a function-based component called `ExampleComponent`. It takes in a `props` parameter, which is an object containing any props that are passed to the component. It returns a `div` element containing an `h1` element that displays the `name` prop.
+
+In the below example i initialize some values with the help of variable. 
+
+```javascript
+import React from 'react';
+
+const FunComp = () => {
+  const count=0;
+  const name="SP";
+  const arr=[1,2,3,4,5];
+
+  return (
+    <>
+      <div>WELCOME!</div>
+      <h1>{count}</h1> 
+      <h1>{name}</h1> 
+      <h1>{arr}</h1> 
+    </>
+  );
+}
+
+export default FunComp;
+```
+
+
+In React, JavaScript objects cannot be directly rendered within JSX because JSX can only render primitive data types like strings, numbers, or arrays. If you want to render the content of an object, you need to access its properties or convert the object to a string using a method like `JSON.stringify`.
+
+Heres how you can render an objects properties or the whole object as a string:
+
+### Render object properties:
+If you want to access and render specific properties of the object, you can do it like this:
+
+```javascript
+import React from 'react';
+
+const FunComp = () => {
+  const obj = { name: "sp" };
+
+  return (
+    <>
+      <div>WELCOME!</div>
+      <h1>{obj.name}</h1> {/* Rendering the name property */}
+    </>
+  );
+}
+
+export default FunComp;
+```
+
+### Render the entire object as a string:
+
+If you want to render the entire object as a string (useful for debugging or displaying data), use `JSON.stringify`:
+
+```jsx
+import React from 'react';
+
+const ClassComp = (props) => {
+  const obj = { name: "sp" };
+
+  return (
+    <>
+      <div>ClassComp, {props.name}, {props.age}</div>
+      <h1>{JSON.stringify(obj)}</h1> {/* Convert the object to a string */}
+    </>
+  );
+}
+
+export default ClassComp;
+```
+
+In this case, `JSON.stringify(obj)` will display the object as a string like `{"name":"sp"}`.
+
+
+
 
 Function-based components have several **advantages** over class-based components:
 
