@@ -796,6 +796,8 @@ function MyComponent() {
 * To update props in functional components, you need to pass new prop values from the parent component.
 * When the parent component updates its state, it triggers a re-render of the child component with the new prop values.
 Here's an example:
+
+
 ```javascript
 import React from "react";
 
@@ -818,9 +820,12 @@ function ChildComponent(props) {
   return <p>Hello {props.name}</p>;
 }
 ```
+
 In summary, to update state in functional components, you use the useState hook to update the state value. To update props, you pass new prop values from the parent component.
 
-### >How to pass data from parent to child? 
+
+### How to pass data from parent to child? 
+
 In React, you can pass data from a parent component to a child component using props. 
 
 *#Parent Component:*
@@ -845,6 +850,7 @@ function ParentComponent() {
 
 export default ParentComponent;
 ```
+
 *#Child Component:*
 
 ```javascript
@@ -863,6 +869,7 @@ function ChildComponent(props) {
 }
 export default ChildComponent;
 ```
+
 Output:
 ![parent to child](./p-to-c.png)
 In this example, the ParentComponent passes the data object to the ChildComponent as a prop. The ChildComponent then receives the data object as a prop, and can access its properties using dot notation (data.name, data.age, data.city) within the function body.
