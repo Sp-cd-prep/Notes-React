@@ -854,11 +854,14 @@ In summary, to update state, you call the setState method with the new state val
 
 ## Update State and props using functional component
 
-1. Update State
+1. Update State:
+
 * To update state in functional components, you need to use the useState hook provided by React.
 * The useState hook returns an array with two values: the current state value and a function that can be used to update the state value.
 * To update the state value, you call the function returned by the useState hook with the new state value.
+
 Here's an example:
+
 ```javascript
 import React, { useState } from "react";
 
@@ -877,6 +880,8 @@ function MyComponent() {
   );
 }
 ```
+
+
 2. Updating Props:
 
 * Props are read-only and cannot be directly modified by the component that receives them, regardless of whether it is a functional component or a class component.
