@@ -760,6 +760,60 @@ export default App;
 
 In this example, the `App` component is rendering two instances of the `Greeting` component, each with a different name prop. When the Greeting component is rendered, it will receive the name prop as an argument to its function, and the value of the name prop will be used to render the greeting message.
 
+
+
+
+### How to pass data from parent to child through Props ? 
+
+In React, you can pass data from a parent component to a child component using props. 
+
+*#Parent Component:*
+
+```javascript
+import React from 'react';
+import ChildComponent from './ChildComponent';
+
+function ParentComponent() {
+  const data = {
+    name: 'John Doe',
+    age: 25,
+    city: 'New York',
+  };
+
+  return (
+    <div>
+      <ChildComponent data={data} />
+    </div>
+  );
+}
+
+export default ParentComponent;
+```
+
+*#Child Component:*
+
+```javascript
+import React from 'react';
+
+function ChildComponent(props) {
+  const { data } = props;
+
+  return (
+    <div>
+      <p>Name: {data.name}</p>
+      <p>Age: {data.age}</p>
+      <p>City: {data.city}</p>
+    </div>
+  );
+}
+export default ChildComponent;
+```
+
+Output:
+![parent to child](./p-to-c.png)
+In this example, the ParentComponent passes the data object to the ChildComponent as a prop. The ChildComponent then receives the data object as a prop, and can access its properties using dot notation (data.name, data.age, data.city) within the function body.
+
+
 ## Difference between State and Props
 
 |Property|	State|	Props|
@@ -854,7 +908,8 @@ In summary, to update state, you call the setState method with the new state val
 
 ## Update State and props using functional component
 
-1. Update State:
+<b>1. Update State:</b>
+
 
 * To update state in functional components, you need to use the useState hook provided by React.
 * The useState hook returns an array with two values: the current state value and a function that can be used to update the state value.
@@ -882,90 +937,88 @@ function MyComponent() {
 ```
 
 
-2. Updating Props:
+  <b>2. Updating Props: </b>
 
-* Props are read-only and cannot be directly modified by the component that receives them, regardless of whether it is a functional component or a class component.
-* To update props in functional components, you need to pass new prop values from the parent component.
-* When the parent component updates its state, it triggers a re-render of the child component with the new prop values.
+To update `props` from a parent component to a child component in React, the common pattern is that the parent passes props down to the child, and if the child needs to update the parent’s state, it can call a function passed from the parent as a prop. 
 
-Here's an example:
+### Example of Parent-Child Communication and Updating Props
 
+#### 1. **Parent Component (`Parent.jsx`)**:
+In the parent component, we'll define some state and a function that updates the state. This function will be passed as a prop to the child component.
 
-```javascript
-import React from "react";
+```jsx
+// Parent.jsx
+import React, { useState } from 'react';
+import Child from './Child';
 
-function ParentComponent() {
-  const [name, setName] = useState("John");
+const Parent = () => {
+  const [name, setName] = useState('John');
 
-  const handleClick = () => {
-    setName("Mary");
+  // Function to update the name
+  const updateName = (newName) => {
+    setName(newName);
   };
 
   return (
     <div>
-      <ChildComponent name={name} />
-      <button onClick={handleClick}>Change Name</button>
+      <h1>Parent Component</h1>
+      <p>Current Name: {name}</p>
+      
+      {/* Passing the name and update function as props to the Child */}
+      <Child name={name} updateName={updateName} />
     </div>
   );
-}
+};
 
-function ChildComponent(props) {
-  return <p>Hello {props.name}</p>;
-}
+export default Parent;
 ```
 
-In summary, to update state in functional components, you use the useState hook to update the state value. To update props, you pass new prop values from the parent component.
+#### 2. **Child Component (`Child.jsx`)**:
+In the child component, we will use the `props` received from the parent. The child can trigger the `updateName` function to update the parent state.
 
-
-### How to pass data from parent to child? 
-
-In React, you can pass data from a parent component to a child component using props. 
-
-*#Parent Component:*
-
-```javascript
+```jsx
+// Child.jsx
 import React from 'react';
-import ChildComponent from './ChildComponent';
 
-function ParentComponent() {
-  const data = {
-    name: 'John Doe',
-    age: 25,
-    city: 'New York',
+const Child = ({ name, updateName }) => {
+
+  // This function will be called when the button is clicked
+  const handleChangeName = () => {
+    const newName = prompt('Enter a new name:');
+    if (newName) {
+      // Call the parent function to update the name
+      updateName(newName);
+    }
   };
 
   return (
     <div>
-      <ChildComponent data={data} />
+      <h2>Child Component</h2>
+      <p>Received Name from Parent: {name}</p>
+      
+      {/* Button to change the parent's name */}
+      <button onClick={handleChangeName}>Change Parent Name</button>
     </div>
   );
-}
+};
 
-export default ParentComponent;
+export default Child;
 ```
 
-*#Child Component:*
+### How It Works:
+1. **Parent Component (`Parent.jsx`)**:
+   - Defines a piece of state (`name`) with the initial value `"John"`.
+   - The `updateName` function is passed to the `Child` component as a prop.
+   - The `name` value is also passed as a prop to the `Child`.
 
-```javascript
-import React from 'react';
+2. **Child Component (`Child.jsx`)**:
+   - Receives `name` and `updateName` as props.
+   - Displays the `name` received from the parent.
+   - When the "Change Parent Name" button is clicked, it prompts the user to enter a new name, then calls `updateName(newName)` to update the parent's state.
 
-function ChildComponent(props) {
-  const { data } = props;
-
-  return (
-    <div>
-      <p>Name: {data.name}</p>
-      <p>Age: {data.age}</p>
-      <p>City: {data.city}</p>
-    </div>
-  );
-}
-export default ChildComponent;
-```
-
-Output:
-![parent to child](./p-to-c.png)
-In this example, the ParentComponent passes the data object to the ChildComponent as a prop. The ChildComponent then receives the data object as a prop, and can access its properties using dot notation (data.name, data.age, data.city) within the function body.
+### Outcome:
+- Initially, the parent displays `"John"` as the name.
+- When the user clicks the "Change Parent Name" button in the child component and enters a new name, the parent component updates its state, causing both the parent and child to re-render and display the updated name.
 
 
 ### >How to pass data from child to parent? 
