@@ -2015,14 +2015,118 @@ return (
 export default Function
 ```
 
-### Cleanup method example with resize of screen width
+
+The `useEffect` hook is crucial in React for managing side effects in functional components. A **side effect** refers to anything that affects something outside the scope of the function, such as fetching data, updating the DOM, or setting timers. The `useEffect` hook runs after every render by default, but it can also be controlled to run only when specific values change, making it highly useful for various scenarios.
+
+Here are some **unique and good examples** of using the `useEffect` hook:
+
+---
+
+### 1. **Fetching Data from an API**
+Fetching data from an external API is one of the most common use cases for `useEffect`. The hook helps you trigger an API call when the component mounts, ensuring that data is loaded as soon as the component is rendered.
+
+```jsx
+import React, { useState, useEffect } from 'react';
+
+const DataFetching = () => {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulate fetching data from an API
+    fetch('https://jsonplaceholder.typicode.com/posts/1')
+      .then((response) => response.json())
+      .then((json) => {
+        setData(json);
+        setLoading(false);
+      });
+  }, []); // Empty dependency array ensures this runs only once after the initial render
+
+  return (
+    <div>
+      {loading ? <p>Loading...</p> : <p>Data: {JSON.stringify(data)}</p>}
+    </div>
+  );
+};
+
+export default DataFetching;
+```
+
+#### Why `useEffect` is important here:
+- **Without `useEffect`**, the API call would happen every time the component renders, potentially causing an infinite loop.
+- With `useEffect`, the API call happens only **once**, after the initial render, which makes it efficient and prevents unnecessary network requests.
+
+---
+
+### 2. **Set and Clear a Timer**
+This example demonstrates how you can use `useEffect` to create a timer (e.g., for a countdown or a clock) and clean up the timer when the component is unmounted.
+
+```jsx
+import React, { useState, useEffect } from 'react';
+
+const Timer = () => {
+  const [seconds, setSeconds] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setSeconds((prevSeconds) => prevSeconds + 1);
+    }, 1000);
+
+    // Cleanup function to clear the interval when the component unmounts
+    return () => clearInterval(interval);
+  }, []); // Empty dependency array ensures this runs only once
+
+  return <h1>Timer: {seconds} seconds</h1>;
+};
+
+export default Timer;
+```
+
+#### Why `useEffect` is important here:
+- `useEffect` is used to **set up** a timer when the component is mounted.
+- The **cleanup function** (`return () => clearInterval(interval)`) ensures that the timer is properly cleared when the component is unmounted, preventing memory leaks.
+
+---
+
+### 3. **Update the Document Title Based on State**
+You can use `useEffect` to dynamically update the document title based on a piece of state. This is useful for improving the user experience, like showing unread messages or notifications in the tab title.
+
+```jsx
+import React, { useState, useEffect } from 'react';
+
+const TitleUpdater = () => {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    document.title = `You clicked ${count} times`;
+  }, [count]); // Only runs when `count` changes
+
+  return (
+    <div>
+      <h1>{count} clicks</h1>
+      <button onClick={() => setCount(count + 1)}>Click me</button>
+    </div>
+  );
+};
+
+export default TitleUpdater;
+```
+
+#### Why `useEffect` is important here:
+- Every time the state `count` changes, the `useEffect` hook ensures that the document title is updated.
+- It is efficient because `useEffect` only runs when the dependency (`count`) changes, preventing unnecessary updates.
+
+---
+
+### 4. **Detecting Window Resize**
+This example demonstrates how to track and react to window size changes. `useEffect` is used to add and remove an event listener on the `window` object.
 
 
 ```javascript
 import React from 'react'
 import { useState, useEffect } from 'react';
 
-const Function=()=>{
+const WindowResize=()=>{
   const[widthCount,setWidthCount] = useState(window.screen.width)
   console.log(widthCount)
 
@@ -2046,8 +2150,64 @@ useEffect(()=>{
   )
 }
 
-export default Function
+export default WindowResize
 ```
+
+
+
+#### Why `useEffect` is important here:
+- The hook allows you to **set up** a window resize event listener only when the component mounts.
+- The cleanup ensures that the event listener is **removed** when the component unmounts, preventing memory leaks.
+
+---
+
+### 5. **Dark Mode Toggle with Local Storage**
+This example shows how `useEffect` can be used to **persist state** across page reloads by syncing it with `localStorage`.
+
+```jsx
+import React, { useState, useEffect } from 'react';
+
+const DarkModeToggle = () => {
+  const [darkMode, setDarkMode] = useState(false);
+
+  useEffect(() => {
+    const savedMode = localStorage.getItem('darkMode') === 'true';
+    setDarkMode(savedMode);
+  }, []); // Runs once to load the initial value from localStorage
+
+  useEffect(() => {
+    // Sync dark mode state with localStorage
+    localStorage.setItem('darkMode', darkMode);
+  }, [darkMode]); // Runs whenever `darkMode` changes
+
+  return (
+    <div style={{ background: darkMode ? '#333' : '#fff', color: darkMode ? '#fff' : '#000' }}>
+      <h1>{darkMode ? 'Dark Mode' : 'Light Mode'}</h1>
+      <button onClick={() => setDarkMode(!darkMode)}>
+        Toggle Dark Mode
+      </button>
+    </div>
+  );
+};
+
+export default DarkModeToggle;
+```
+
+#### Why `useEffect` is important here:
+- The first `useEffect` runs only once to **load the saved dark mode setting** from `localStorage` when the component mounts.
+- The second `useEffect` **syncs the state** with `localStorage` whenever `darkMode` changes, ensuring that the dark mode preference is saved between sessions.
+
+---
+
+### Why is `useEffect` important in these examples?
+
+- **Side Effects Management**: React's rendering model is pure, meaning functions should only return UI. Side effects (like fetching data, setting timers, or interacting with browser APIs) need to be managed separately, and `useEffect` is designed for this purpose.
+- **Dependency Control**: By specifying dependencies, `useEffect` can be controlled to run only when necessary, making the app more efficient and preventing unnecessary re-renders or actions.
+- **Cleanup Logic**: `useEffect` allows you to **clean up** after side effects, like removing event listeners, clearing timers, or canceling API requests. This is crucial for preventing memory leaks or performance issues in React apps.
+
+
+
+
 
 
 ## useRef
