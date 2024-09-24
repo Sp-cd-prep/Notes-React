@@ -2208,45 +2208,17 @@ export default DarkModeToggle;
 
 
 
-
-
 ## useRef
-useRef is a React hook that allows you to create a mutable reference to an element or value, which persists across re-renders of your component.
+
+The useRef hook in React is a powerful tool that allows you to create a reference to a DOM element. This reference can be used to read or modify properties of the DOM element, effectively allowing you to manipulate the DOM directly from your React code.
+
+1. useRef is a React hook that allows you to create a *mutable variable, which will not re-render of your component.
+
+> A mutable variable is a variable that can change its value or state during a program.
 
  It returns an object with a single property, `current`, which initially holds the value passed as argument (or undefined if no argument is provided). We can modify the `current` property without triggering a re-render of the component. This makes it useful for managing mutable values and for accessing the underlying DOM elements.
 
-In simple terms, useRef can be used to store values that don't change often and are not used for rendering purposes, such as DOM elements, timers, or any other mutable value.
-
-```javascript
-
-function App() { 
-  const [inputValue, setInputValue] = useState(""); 
-  const count = useRef(0); 
-  useEffect(() => { 
-    count.current = count.current + 1; }); 
-    return ( 
-      <> 
-        <input type="text" 
-        value={inputValue} onChange={(e) => 
-        setInputValue(e.target.value)} /> 
-        <h1>Render Count: {count.current}</h1> 
-      </> ); 
-      } 
-      
-export default App;
-```
-Output:
-![useref](./image%20(7).png)
-In the example,
-The component has a local state variable called `inputValue` that is initialized with an empty string using useState. `setInputValue` is a function used to update the value of `inputValue` state variable when the input field changes.
-
-The component also has a count variable initialized with a value of 0 using the `useRef` hook. count is used to keep track of the number of times the component has been rendered.
-
-The useEffect hook is used to update the value of count variable whenever the component is rendered. The useEffect hook runs after the component has been rendered, and it updates the count variable by incrementing it by 1.
-
-The component returns two elements: an input field and an h1 element that displays the current value of count. Whenever the input field is changed, the setInputValue function is called, which updates the inputValue state variable and causes the component to re-render. When the component is re-rendered, the useEffect hook runs and updates the value of count to reflect the new render count.
-
-### Example-2
+Example-1:
 
 ```javascript
 import React, { useEffect, useRef, useState } from 'react'
@@ -2273,10 +2245,25 @@ const UseRefHook = () => {
 }
 
 export default UseRefHook
+```
+Output:
+![useref](./image%20(7).png)
+In the example,
+The component has a local state variable called `inputValue` that is initialized with an empty string using useState. `setInputValue` is a function used to update the value of `inputValue` state variable when the input field changes.
+
+The component also has a count variable initialized with a value of 0 using the `useRef` hook. count is used to keep track of the number of times the component has been rendered.
+
+The useEffect hook is used to update the value of count variable whenever the component is rendered. The useEffect hook runs after the component has been rendered, and it updates the count variable by incrementing it by 1.
+
+The component returns two elements: an input field and an h1 element that displays the current value of count. Whenever the input field is changed, the setInputValue function is called, which updates the inputValue state variable and causes the component to re-render. When the component is re-rendered, the useEffect hook runs and updates the value of count to reflect the new render count.
 
 
 Example-2:
-//2. used to access a DOM element directly
+
+2. used to access a DOM element directly
+
+```javascript
+
 
 import React, { useEffect, useRef, useState } from 'react'
 
@@ -2301,6 +2288,48 @@ const UseRefHook = () => {
 
 export default UseRefHook
 ```
+
+
+Example-3:
+
+```javascript
+import React, { useRef } from 'react';
+
+const VideoPlayer = () => {
+  const videoRef = useRef(null); // useRef to access the video element
+
+  const playVideo = () => {
+    videoRef.current.play();  // Play the video using the DOM reference
+  };
+
+  const pauseVideo = () => {
+    videoRef.current.pause();  // Pause the video using the DOM reference
+  };
+
+  return (
+    <div>
+      <video
+        ref={videoRef}
+        width="600"
+        controls
+        src="https://www.w3schools.com/html/mov_bbb.mp4"
+      />
+      <div>
+        <button onClick={playVideo}>Play</button>
+        <button onClick={pauseVideo}>Pause</button>
+      </div>
+    </div>
+  );
+};
+
+export default VideoPlayer;
+```
+
+![alt text](image-1.png)
+
+
+In simple terms, useRef can be used to store values that don't change often and are not used for rendering purposes, such as DOM elements, timers, or any other mutable value.
+
 
 ## React.memo()
 
