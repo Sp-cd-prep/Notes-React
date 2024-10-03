@@ -2416,6 +2416,42 @@ In this code
 In summary, this React application allows users to add todo items through a form in the `Parent` component, and the added items are displayed in a list through the `DisplayTodo` component, with each item rendered by the `TodoItem` component. The use of React memoization helps optimize the rendering performance of the components.
 
 
+
+import React, { useState } from 'react';
+
+// Child component wrapped with React.memo to prevent unnecessary re-renders
+const ChildComponent = React.memo(({ value }) => {
+  console.log('Child re-rendered');
+  return <div>Child Value: {value}</div>;
+});
+
+function ParentComponent() {
+  const [count, setCount] = useState(0);
+  const [otherValue, setOtherValue] = useState(0);
+
+  console.log('Parent re-rendered');
+
+  return (
+    <div>
+      <p>Count: {count}</p>
+      <button onClick={() => setCount(count + 1)}>Increment Count</button>
+
+      <p>Other Value: {otherValue}</p>
+      <button onClick={() => setOtherValue(otherValue + 1)}>Increment Other Value</button>
+
+      {/* Child component receives otherValue as prop */}
+      <ChildComponent value={otherValue} />
+    </div>
+  );
+}
+
+export default ParentComponent;
+
+
+
+
+
+
 ## useMemo()
 
 useMemo is a React hook that allows you to memoize the result of a function, and recompute the result only when the dependencies of the function have changed.
@@ -2939,8 +2975,9 @@ export default SecondComponent
 
 ## *DAY-9*
 
-  # Routing
-  ## What is a React Router ?
+# Routing
+
+## What is a React Router ?
 * React Router is a powerful routing library built on top of React that helps to flow your application incredibly quickly, while
 keeping the URL in sync with what's being displayed on the page.
 
@@ -2986,6 +3023,15 @@ The difference between link and anchor tag is that
 **How to use links in React ?**
 
 Initially we are on Home page , on click of Home we move to about page and there is a change in url(localhost:3000/about)
+
+## Types of Routing in React
+React Router provides several types of routers for different use cases. The most commonly used routers are:
+
+1. **BrowserRouter**
+2. **HashRouter**
+3. **MemoryRouter**
+4. **StaticRouter** (used mostly for server-side rendering)
+5. **NativeRouter** (used in React Native)
 
 
 Here lets take one simple example how to perform routing .
@@ -3087,7 +3133,169 @@ Output:
 ![Home](./image%20(9).png) ![Home](./image%20(10).png) ![Home](./image%20(11).png)
 </span>
 
-Certainly! Let's cover each topic one by one.
+
+
+
+---
+
+### 2. **HashRouter**
+
+**HashRouter** uses the hash portion of the URL (the part after `#`) to keep track of routing. For example, the URL might look like `http://example.com/#/about`. Everything after `#` is handled client-side and not sent to the server.
+
+#### Example of `HashRouter`:
+
+```jsx
+import React from "react";
+import { HashRouter as Router, Routes, Route, Link } from "react-router-dom";
+import Home from "./Home";
+import About from "./About";
+import Contact from "./Contact";
+
+const App = () => {
+  return (
+    <Router>
+      <nav>
+        <ul>
+          <li><Link to="/">Home</Link></li>
+          <li><Link to="/about">About</Link></li>
+          <li><Link to="/contact">Contact</Link></li>
+        </ul>
+      </nav>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<Contact />} />
+      </Routes>
+    </Router>
+  );
+};
+
+export default App;
+```
+
+- **Pros**: No need to configure the server; it works even if the server doesn’t handle client-side routes.
+- **Cons**: The `#` in the URL can be less clean and not as SEO-friendly.
+
+---
+
+### 3. **MemoryRouter**
+
+**MemoryRouter** keeps the URL history in memory (it doesn’t read or write to the address bar). This is useful for **non-browser environments** or testing purposes, or when the app doesn’t need to interact with the browser URL.
+
+#### Example of `MemoryRouter`:
+
+```jsx
+import React from "react";
+import { MemoryRouter as Router, Routes, Route, Link } from "react-router-dom";
+import Home from "./Home";
+import About from "./About";
+import Contact from "./Contact";
+
+const App = () => {
+  return (
+    <Router initialEntries={['/']}>
+      <nav>
+        <ul>
+          <li><Link to="/">Home</Link></li>
+          <li><Link to="/about">About</Link></li>
+          <li><Link to="/contact">Contact</Link></li>
+        </ul>
+      </nav>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<Contact />} />
+      </Routes>
+    </Router>
+  );
+};
+
+export default App;
+```
+
+- **Pros**: Great for **unit tests** and **non-browser** environments.
+- **Cons**: Does not affect the browser URL, so it’s not useful for typical web applications.
+
+---
+
+### 4. **StaticRouter**
+
+**StaticRouter** is mainly used for **server-side rendering (SSR)**. It doesn’t change the URL and is generally used to render the app on the server before sending HTML to the client.
+
+#### Example of `StaticRouter` (typically used in server-side environments):
+
+```jsx
+import React from "react";
+import { StaticRouter as Router, Routes, Route } from "react-router-dom";
+import Home from "./Home";
+import About from "./About";
+import Contact from "./Contact";
+
+const App = ({ location }) => {
+  return (
+    <Router location={location}>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<Contact />} />
+      </Routes>
+    </Router>
+  );
+};
+
+export default App;
+```
+
+- **Pros**: Great for server-side rendering where the app is rendered to static HTML.
+- **Cons**: Cannot be used in a client-side environment (i.e., it’s purely for server rendering).
+
+---
+
+### 5. **NativeRouter** (React Native)
+
+If you are working with **React Native** (for mobile apps), you would use **NativeRouter** instead of `BrowserRouter` or `HashRouter`. It’s provided by `react-router-native` for mobile applications.
+
+```jsx
+import React from 'react';
+import { NativeRouter, Routes, Route, Link } from 'react-router-native';
+import { Text, View } from 'react-native';
+
+const Home = () => <Text>Home Page</Text>;
+const About = () => <Text>About Page</Text>;
+
+const App = () => (
+  <NativeRouter>
+    <View>
+      <Link to="/"><Text>Home</Text></Link>
+      <Link to="/about"><Text>About</Text></Link>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/about" element={<About />} />
+      </Routes>
+    </View>
+  </NativeRouter>
+);
+
+export default App;
+```
+
+- **Pros**: Works well with React Native’s navigation system.
+- **Cons**: Limited to mobile apps (React Native only).
+
+---
+
+### Summary of Use Cases:
+
+- **BrowserRouter**: Best for web apps where you want clean URLs without `#`. It requires server-side support.
+- **HashRouter**: Good for apps where you can’t control the server (e.g., GitHub Pages).
+- **MemoryRouter**: Used in testing or non-browser environments.
+- **StaticRouter**: Great for server-side rendering (SSR).
+- **NativeRouter**: Used in React Native apps for mobile navigation.
+
+
+
+
+
 
 ### a. **NavLink in React Router:**
 `NavLink` is a component provided by React Router that is similar to `Link`, but it allows you to style the link based on whether it matches the current URL. It's commonly used for navigation menus where you want to highlight the active link.
@@ -3162,7 +3370,214 @@ nav .active {
 
 In this example, the `NavLink` components will have the class `active` when their `to` prop matches the current URL.
 
+### What is the `useParams()` Hook in React Router?
 
+The `useParams()` hook is a part of **React Router** that allows you to **access URL parameters** in your components. URL parameters are dynamic values embedded in the URL, and `useParams()` enables you to extract and use them.
+
+For example, in a URL like `/user/123`, `123` is a parameter that can represent a user ID. The `useParams()` hook lets you grab this dynamic value and use it within your component logic.
+
+### When to Use `useParams()`:
+- When you have **dynamic routes** and want to retrieve the **values of the dynamic parts** of the URL.
+- Typically used in **detail pages**, where the page is designed to show details about a specific entity (e.g., user, product, post, etc.), based on its ID or slug in the URL.
+
+### How to Use `useParams()`
+
+#### 1. **Setting Up the Route:**
+First, define a route in your `App.js` or router setup that includes **route parameters**.
+
+```jsx
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import UserDetails from './UserDetails';
+
+function App() {
+  return (
+    <Router>
+      <Routes>
+        {/* Dynamic route with a parameter `id` */}
+        <Route path="/user/:id" element={<UserDetails />} />
+      </Routes>
+    </Router>
+  );
+}
+
+export default App;
+```
+
+- **`:id`** in the route `/user/:id` represents a dynamic URL parameter. Whatever value is placed in the `id` part of the URL (e.g., `/user/123`) will be accessible inside the `UserDetails` component.
+
+#### 2. **Using `useParams()` in the Component:**
+In the component (e.g., `UserDetails.js`), use the `useParams()` hook to access the dynamic `id` from the URL.
+
+```jsx
+import React from 'react';
+import { useParams } from 'react-router-dom';
+
+function UserDetails() {
+  // Extract the dynamic part of the URL
+  const { id } = useParams();
+
+  return (
+    <div>
+      <h1>User Details</h1>
+      <p>User ID: {id}</p>
+      {/* You can use the `id` to fetch user details from an API, etc. */}
+    </div>
+  );
+}
+
+export default UserDetails;
+```
+
+- `useParams()` returns an object where the keys correspond to the named parameters in the route (e.g., `id` in this case), and the values are the actual values from the URL.
+
+### Example Walkthrough:
+
+- If the URL is `/user/123`, the `useParams()` hook will return `{ id: '123' }`.
+- You can now use `id` in the `UserDetails` component to display or fetch user-specific data (e.g., calling an API to fetch the user with ID `123`).
+
+---
+
+### Different Scenarios for Using `useParams()`
+
+#### 1. **Multiple Parameters in the URL**
+You can have multiple dynamic parameters in the URL, such as `/category/:categoryId/product/:productId`.
+
+```jsx
+import { useParams } from 'react-router-dom';
+
+function ProductDetails() {
+  const { categoryId, productId } = useParams();
+
+  return (
+    <div>
+      <h1>Product Details</h1>
+      <p>Category ID: {categoryId}</p>
+      <p>Product ID: {productId}</p>
+      {/* You can now use `categoryId` and `productId` to fetch data */}
+    </div>
+  );
+}
+```
+
+- For a URL like `/category/electronics/product/456`, the `useParams()` hook will return:
+  ```js
+  { categoryId: 'electronics', productId: '456' }
+  ```
+
+#### 2. **Optional Parameters**
+You can have optional parameters in the URL by adding a question mark (`?`) in the route definition, like `/post/:postId/:commentId?`. This means `commentId` is optional and might not be present in the URL.
+
+```jsx
+import { useParams } from 'react-router-dom';
+
+function PostDetails() {
+  const { postId, commentId } = useParams();
+
+  return (
+    <div>
+      <h1>Post Details</h1>
+      <p>Post ID: {postId}</p>
+      {commentId ? <p>Comment ID: {commentId}</p> : <p>No comment selected</p>}
+    </div>
+  );
+}
+```
+
+- URL `/post/123` will show only the post ID.
+- URL `/post/123/456` will show both post ID and comment ID.
+
+#### 3. **Fetching Data Using the URL Parameter**
+You can use the dynamic parameters from `useParams()` to fetch data from an API. For example, fetching details of a user based on the `id` parameter.
+
+```jsx
+import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+
+function UserDetails() {
+  const { id } = useParams();
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    // Simulate API call
+    fetch(`https://api.example.com/users/${id}`)
+      .then((response) => response.json())
+      .then((data) => setUser(data))
+      .catch((error) => console.error('Error fetching user:', error));
+  }, [id]);
+
+  if (!user) {
+    return <div>Loading...</div>;
+  }
+
+  return (
+    <div>
+      <h1>User Details</h1>
+      <p>User ID: {id}</p>
+      <p>Name: {user.name}</p>
+      <p>Email: {user.email}</p>
+    </div>
+  );
+}
+
+export default UserDetails;
+```
+
+- When the user visits `/user/123`, the `useParams()` hook extracts the `id` (`123`), and then the app fetches the user details for that ID.
+
+#### 4. **Handling Missing Parameters**
+If a parameter is missing, you can handle it by checking whether `useParams()` returns `undefined` for that parameter.
+
+```jsx
+import { useParams } from 'react-router-dom';
+
+function Page() {
+  const { pageId } = useParams();
+
+  if (!pageId) {
+    return <div>No page ID provided!</div>;
+  }
+
+  return <div>Showing Page ID: {pageId}</div>;
+}
+```
+
+- If the user visits `/page/`, the component will render `"No page ID provided!"`, as `pageId` will be `undefined`.
+
+#### 5. **Handling Invalid or Unknown Parameters**
+In some cases, you might want to validate the URL parameters or handle cases where the parameter is invalid. For example, if you expect a numeric ID but the user enters a string.
+
+```jsx
+import { useParams } from 'react-router-dom';
+
+function UserDetails() {
+  const { id } = useParams();
+
+  if (isNaN(id)) {
+    return <div>Invalid user ID!</div>;
+  }
+
+  return <div>Valid User ID: {id}</div>;
+}
+```
+
+- If the user visits `/user/abc`, the component will render `"Invalid user ID!"` because `id` is not a valid number.
+
+---
+
+### Summary:
+
+- **`useParams()`** is used to extract URL parameters from dynamic routes in **React Router**.
+- It returns an object containing the parameters as key-value pairs.
+- It’s useful in various scenarios like fetching data based on dynamic IDs, handling optional or multiple parameters, and ensuring parameters are valid.
+  
+### Key Scenarios:
+1. **Single Parameter**: Extracting a single value from the URL (e.g., `/user/:id`).
+2. **Multiple Parameters**: Handling routes with multiple dynamic parameters (e.g., `/category/:categoryId/product/:productId`).
+3. **Optional Parameters**: Handling routes where some parameters are optional.
+4. **Fetching Data**: Using URL parameters to fetch specific data from an API.
+5. **Handling Missing or Invalid Parameters**: Safely dealing with cases where parameters are missing or invalid.
+
+This makes `useParams()` a powerful and flexible hook for building dynamic and data-driven pages in your React apps.
 
 ## Dynamic params in Routing
 
@@ -3535,7 +3950,7 @@ export default ChildC
 ```
 Output:
 
-![Alt text](a.png)
+![Alt text](Images/a.png)
 
 Demonstrating the Data initialized in Parent, Needed in last component(Child C) have to passed down each level known as Prop Drilling.
 
