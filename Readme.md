@@ -3300,75 +3300,200 @@ export default App;
 ### a. **NavLink in React Router:**
 `NavLink` is a component provided by React Router that is similar to `Link`, but it allows you to style the link based on whether it matches the current URL. It's commonly used for navigation menus where you want to highlight the active link.
 
-**Example:**
+#### Some of the key properties include:
+
+1. **`isActive`**: Determines if the link is currently active (as we discussed before).
+2. **`className`**: Dynamically sets the `className` of the `NavLink` based on whether it is active.
+3. **`style`**: Dynamically sets the inline `style` of the `NavLink` based on whether it is active.
+4. **`to`**: Specifies the target route for the link.
+5. **`state`**: Passes extra state information to the route.
+
+---
+
+### 1. **`isActive`** (Automatically Passed as an Argument)
+
+- **Purpose**: As we've seen, `isActive` is automatically passed to the `className` and `style` functions to help determine if the link is active.
+  
+Example (Recap):
 ```jsx
-import React from 'react'
-import FunctionCompo from './FunctionCompo'
-import Home from './Home'
-import ClassCompo from './ClassCompo';
-import {Routes,Route,NavLink} from 'react-router-dom'
-import User from './User';
-import './App.css'
+<NavLink
+  to="/home"
+  style={({ isActive }) => ({ color: isActive ? "yellow" : "white" })}
+>
+  Home
+</NavLink>
+```
 
+---
 
-const Routing = () => {
+### 2. **`className`**
+
+- **Purpose**: You can dynamically set a CSS class based on whether the `NavLink` is active or not. This is similar to how `style` works but allows you to define more complex styling rules using external CSS.
+
+Example:
+```jsx
+<NavLink
+  to="/home"
+  className={({ isActive }) => (isActive ? "active-link" : "inactive-link")}
+>
+  Home
+</NavLink>
+```
+
+In your CSS file:
+```css
+.active-link {
+  font-weight: bold;
+  color: yellow;
+}
+
+.inactive-link {
+  color: white;
+}
+```
+Here, `active-link` will be applied when the route is active, and `inactive-link` will be applied when it's not.
+
+---
+
+### 3. **`style`**
+
+- **Purpose**: You can directly apply inline styles based on whether the `NavLink` is active or not. We've seen this in earlier examples.
+
+Example:
+```jsx
+<NavLink
+  to="/about"
+  style={({ isActive }) => ({
+    textDecoration: isActive ? "underline" : "none",
+    color: isActive ? "green" : "gray",
+  })}
+>
+  About
+</NavLink>
+```
+
+---
+
+### 4. **`to`**
+
+- **Purpose**: The `to` prop specifies the target route for the link. It can be a string representing the path or an object for more complex configurations (e.g., handling query parameters, hashes, etc.).
+
+Examples:
+```jsx
+// Basic usage
+<NavLink to="/profile">Profile</NavLink>
+
+// Using an object with query and hash
+<NavLink to={{ pathname: "/profile", search: "?name=John", hash: "#details" }}>
+  Profile with Query and Hash
+</NavLink>
+```
+In the second example, the URL would be `/profile?name=John#details`.
+
+---
+
+### 5. **`state`**
+
+- **Purpose**: The `state` prop allows you to pass additional state data to the route you're navigating to. This data can be accessed by the target component through the `useLocation` hook.
+
+Example:
+```jsx
+<NavLink to="/dashboard" state={{ from: "home" }}>
+  Dashboard
+</NavLink>
+```
+- In this example, when you navigate to the `/dashboard` route, you can retrieve the state (`{ from: "home" }`) using `useLocation` in the target component.
+
+```jsx
+import { useLocation } from 'react-router-dom';
+
+const Dashboard = () => {
+  const location = useLocation();
+  console.log(location.state); // Output: { from: "home" }
+  return <div>Dashboard Page</div>;
+};
+```
+
+---
+
+### Full Example Using Different `NavLink` Properties
+
+```jsx
+import React from 'react';
+import { NavLink } from 'react-router-dom';
+import './Navbar.css'; // Assume we have some CSS for active/inactive links
+
+const Navbar = () => {
   return (
-    <>
-     <nav>
-      <NavLink to="/" style={({ isActive }) => ({color: isActive? "greenyellow": "white",})} >
+    <nav>
+      <NavLink
+        to="/"
+        end
+        className={({ isActive }) => (isActive ? "active-link" : "inactive-link")}
+      >
         Home
       </NavLink>
-      <NavLink to="/about"  activeClassName="active">
+
+      <NavLink
+        to="/about"
+        className={({ isActive }) => (isActive ? "active-link" : "inactive-link")}
+        style={({ isActive }) => ({ fontWeight: isActive ? "bold" : "normal" })}
+      >
         About
       </NavLink>
-      <NavLink to="/contact" activeClassName="active">
+
+      <NavLink
+        to="/contact"
+        state={{ from: "navbar" }}
+        className={({ isActive }) => (isActive ? "active-link" : "inactive-link")}
+      >
         Contact
       </NavLink>
-    </nav>
-  
-    <Routes>
-      <Route path="/"  element={<Home/>}/>
-      <Route path="/about"  element={<FunctionCompo/>} />
-      <Route path="/contact"  element={<ClassCompo/>}/>
-      <Route path="/users/:id" element={<User />} />
-    </Routes>
-    </>
-  )
-}
 
-export default Routing
+      <NavLink
+        to="/profile"
+        replace
+        className={({ isActive }) => (isActive ? "active-link" : "inactive-link")}
+      >
+        Profile (Replace)
+      </NavLink>
+    </nav>
+  );
+};
+
+export default Navbar;
 ```
+
+### CSS (`Navbar.css`):
 
 ```css
-.heading{
+.active-link {
+  color: yellow;
+  text-decoration: underline;
+}
 
-  height: 70px;
-  background-color: rgb(162, 18, 18);
+.inactive-link {
   color: white;
-  text-align: center;
-
-}
-nav {
-  display: flex;
-  justify-content: space-around;
-  padding: 10px;
-  background-color: #333;
-}
-
-nav a {
   text-decoration: none;
-  color: white;
-  padding: 10px;
-  border-radius: 5px;
-}
-
-nav a:hover,
-nav .active {
-  background-color: #ae2222;
 }
 ```
 
-In this example, the `NavLink` components will have the class `active` when their `to` prop matches the current URL.
+### What Happens in the Example:
+1. **Home**: Will only be active on the exact `/` route because of the `end` prop.
+2. **About**: If it's active, it will be bolded using the inline `style` prop.
+3. **Contact**: Sends additional state `{ from: "navbar" }` to the `/contact` route.
+4. **Profile (Replace)**: Navigating to `/profile` will replace the current history entry instead of pushing a new one.
+
+### Summary:
+
+- `isActive`: Used to conditionally style or apply classes based on whether the link is active.
+- `end`: Ensures the link is only active for exact matches.
+- `className` and `style`: Dynamically apply CSS classes or inline styles.
+- `to`: Specifies the target path, and can handle complex URLs (e.g., with query parameters or hashes).
+- `replace`: Replaces the current entry in history instead of pushing a new one.
+- `state`: Passes additional state to the route, which can be accessed in the destination component.
+
+
 
 ### What is the `useParams()` Hook in React Router?
 
