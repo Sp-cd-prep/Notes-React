@@ -3706,9 +3706,11 @@ This makes `useParams()` a powerful and flexible hook for building dynamic and d
 
 ## Dynamic params in Routing
 
+
+### Example-1 
+
 Dynamic parameters in routing refer to a feature in React Router that allows you to define URL patterns with variable segments. This is useful when you want to create routes that can handle a wide range of inputs without having to define a separate route for each one.
 
-Here's a simple example of how to use dynamic parameters in React Router:
 
 // App.js
 ```javascript
@@ -3777,6 +3779,208 @@ In this example, we have three components:
 * User: A component that displays information about a specific user, based on the dynamic parameter id in the URL.
 
 When a user clicks on a link to a user page, React Router will match the URL to the Route for User and pass the id parameter as a prop. The User component then uses the useParams hook to extract the id parameter and render information specific to that user.
+
+
+
+### Example-2 based on Fetching Data Using the URL Parameter
+
+### Components Overview:
+1. **App.js**: The main component with routing logic.
+2. **UserList.js**: A component displaying a list of users (each with a link to their details page).
+3. **UserDetails.js**: The component you've already provided that fetches user data based on the `id` URL parameter.
+4. **Navbar.js**: A simple navigation bar for the app.
+5. **Basic CSS** (optional): For styling.
+
+---
+
+### 1. **App.js** – Main Application with Routing
+
+```jsx
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import UserList from './UserList';
+import UserDetails from './UserDetails';
+import Navbar from './Navbar';
+
+function App() {
+  return (
+    <Router>
+      <Navbar />
+      <div style={{ padding: '20px' }}>
+        <Routes>
+          <Route path="/" element={<UserList />} />
+          <Route path="/user/:id" element={<UserDetails />} />
+        </Routes>
+      </div>
+    </Router>
+  );
+}
+
+export default App;
+```
+
+- **Explanation**: 
+  - The `App` component sets up the routes. When the path is `/`, it renders the `UserList` component. When the path is `/user/:id`, it renders the `UserDetails` component, where `:id` is the dynamic parameter.
+
+---
+
+### 2. **UserList.js** – Displays a List of Users
+
+```jsx
+import React from 'react';
+import { Link } from 'react-router-dom';
+
+const users = [
+  { id: 1, name: 'John Doe' },
+  { id: 2, name: 'Jane Smith' },
+  { id: 3, name: 'Alice Johnson' },
+];
+
+function UserList() {
+  return (
+    <div>
+      <h2>User List</h2>
+      <ul>
+        {users.map((user) => (
+          <li key={user.id}>
+            <Link to={`/user/${user.id}`}>
+              {user.name}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+export default UserList;
+```
+
+- **Explanation**: 
+  - This component renders a list of users. Each user's name is wrapped in a `Link` component that routes to `/user/:id`, where `id` is the user's unique ID. Clicking the link will take the user to the `UserDetails` page for that specific user.
+
+---
+
+### 3. **UserDetails.js** – Fetches and Displays User Details
+
+```jsx
+import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+
+function UserDetails() {
+  const { id } = useParams(); // Get the id from the URL
+  const [user, setUser] = useState(null); // State to hold the user data
+
+  useEffect(() => {
+    // Simulate API call
+    fetch(`https://jsonplaceholder.typicode.com/users/${id}`) // Using a placeholder API
+      .then((response) => response.json())
+      .then((data) => setUser(data)) // Set the fetched data to user state
+      .catch((error) => console.error('Error fetching user:', error));
+  }, [id]);
+
+  if (!user) {
+    return <div>Loading...</div>; // Show a loading message if the data is not yet loaded
+  }
+
+  return (
+    <div>
+      <h1>User Details</h1>
+      <p><strong>User ID:</strong> {id}</p>
+      <p><strong>Name:</strong> {user.name}</p>
+      <p><strong>Email:</strong> {user.email}</p>
+      <p><strong>Phone:</strong> {user.phone}</p>
+      <p><strong>Website:</strong> {user.website}</p>
+    </div>
+  );
+}
+
+export default UserDetails;
+```
+
+- **Explanation**: 
+  - The `useParams` hook extracts the `id` from the URL.
+  - The component makes an API request to fetch the user details based on this `id`. (In this case, I'm using the `jsonplaceholder.typicode.com` API for sample data.)
+  - While waiting for the data, the component displays a "Loading..." message.
+  - Once the data is fetched, it displays the user details.
+
+---
+
+### 4. **Navbar.js** – A Simple Navigation Bar
+
+```jsx
+import React from 'react';
+import { Link } from 'react-router-dom';
+
+function Navbar() {
+  return (
+    <nav style={{ marginBottom: '20px', backgroundColor: '#f8f9fa', padding: '10px' }}>
+      <Link to="/" style={{ marginRight: '10px' }}>
+        Home
+      </Link>
+    </nav>
+  );
+}
+
+export default Navbar;
+```
+
+- **Explanation**: 
+  - This is a simple navigation bar with a link to the home page (which displays the list of users). You can expand it further as needed.
+
+---
+
+### Optional: **Basic Styling (App.css)**
+
+```css
+body {
+  font-family: Arial, sans-serif;
+}
+
+nav {
+  background-color: #333;
+  color: white;
+  padding: 10px;
+}
+
+nav a {
+  color: white;
+  text-decoration: none;
+  margin-right: 10px;
+}
+
+nav a:hover {
+  text-decoration: underline;
+}
+
+h1 {
+  color: #2c3e50;
+}
+
+ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+li {
+  margin-bottom: 10px;
+}
+
+a {
+  color: #3498db;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+```
+
+
+
+
+
+
 
 ## useNavigate
 
