@@ -4938,17 +4938,7 @@ In Redux, the state of your entire application is stored in a single **store**. 
 
 - **Improved Developer Experience:-**  Redux Toolkit comes with helpful development tools, including an integration with the Redux DevTools Extension, which makes it easier to debug and inspect the state of your application.
 
-- Performance Optimization: -
-
-Redux Toolkit includes a utility called "createSlice" that automatically generates optimized Redux reducer functions based on the initial state and action types you provide. This can help improve performance by reducing the amount of unnecessary work done by your reducers.
-
-IV. Improved Type Safety:-
-
- Redux Toolkit comes with built-in TypeScript types, which can help catch errors at compile time rather than runtime. This can improve the stability and maintainability of your codebase.
-
-V. Scalability:-
-
- Redux Toolkit makes it easier to manage complex Redux applications by providing a clear and consistent architecture for managing application state. This can help you scale your application as it grows and becomes more complex.
+- **Performance Optimization:-** Redux Toolkit includes a utility called "createSlice" that automatically generates optimized Redux reducer functions based on the initial state and action types you provide. This can help improve performance by reducing the amount of unnecessary work done by your reducers.
 
 #### c. Difference Between Context API and Redux:
 
