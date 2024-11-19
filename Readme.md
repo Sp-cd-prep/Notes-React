@@ -5283,3 +5283,39 @@ Saga middleware is a library for handling side effects in React applications usi
 
 
 
+
+### **Steps to Build a Counter App with Redux Toolkit**
+
+1. **Install Required Packages**
+   - Install `@reduxjs/toolkit` and `react-redux` using:
+     ```bash
+     npm install @reduxjs/toolkit react-redux
+     ```
+
+2. **Create the Slice**
+   - In `counterSlice.js`, define a slice with:
+     - Initial state:
+     - Define createSlice and inside that define name, initialstate,reducer
+     - Reducers: `increment`, `decrement`, and `reset`.
+   - Export the actions (`increment`, `decrement`, `reset`) and the reducer.
+
+3. **Set Up the Store**
+   - In `store.js`, use `configureStore` from Redux Toolkit:
+     - For multiple slices: `reducer: { slicename: counterReducer }`.
+
+4. **Build the Counter Component**
+   - In `CounterComponent.js`, create a functional React component:
+     - Use `useSelector` to read the state. useSelector(state=>state.slicename)
+     - Use `useDispatch` to dispatch actions (`increment`, `decrement`, `reset`).
+   - Display the current count and buttons for each action.
+
+5. **Connect Redux to React**
+   - Wrap the `App` component with `<Provider>` in `index.js`:
+   - Pass the `store` as a prop to the `Provider`.
+---
+
+- **File Structure**: Keep files modular:
+  - `store.js`: Store setup.
+  - `counterSlice.js`: Slice and actions.
+  - `CounterComponent.js`: React component.
+---
